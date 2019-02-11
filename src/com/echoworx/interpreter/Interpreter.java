@@ -28,16 +28,18 @@ public class Interpreter {
 				String line = scanner.nextLine();
 				
 				if (line.startsWith(Tag.TO)) {
-					message.setTo(line);
+					message.setTo(line.replaceAll("To:", ""));
 					continue;
 				} else if (line.startsWith(Tag.FROM)) {
-					message.setFrom(line);
+					message.setFrom(line.replaceAll("From:", ""));
 					continue;
 				} else if (line.startsWith(Tag.SUBJECT)) {
-					message.setSubject(line);
+					message.setSubject(line.replaceAll("Subject:", ""));
 					continue;
 				} else {
-					body.add(line);
+					if (!line.startsWith("Body:")) {
+						body.add(line);
+					}
 				}
 			}
 			message.setBody(body);
@@ -74,7 +76,7 @@ public class Interpreter {
 			List<String> body = message.getBody();
 			List<String> newBody = new ArrayList<String>();
 			
-			for (int i = 1; i < body.size(); i++) {
+			for (int i = 0; i < body.size(); i++) {
 				newBody.add(reversalRule(replacementRule(body.get(i))));
 			}
 			
@@ -86,9 +88,10 @@ public class Interpreter {
 	
 	private void printMessage(Message message) {
 		System.out.println("=== Begin ===");
-		System.out.println(message.getTo());
-		System.out.println(message.getFrom());
-		System.out.println(message.getSubject());
+		System.out.println(Tag.TO + ":" + message.getTo());
+		System.out.println(Tag.FROM + ":" + message.getFrom());
+		System.out.println(Tag.SUBJECT + ":" + message.getSubject());
+		System.out.println(Tag.BODY+ ":");
 		message.getBody().stream().forEach(System.out::println);
 		System.out.println("=== End ===");
 	}
@@ -102,7 +105,7 @@ public class Interpreter {
 	}
 	
 	private boolean checkSubjectStartsWithSECURE(String line) {
-		if (line.contains(Tag.SECURE)) {
+		if (line.startsWith(Tag.SECURE)) {
 			return true;
 		} else {
 			return false;
@@ -143,21 +146,15 @@ public class Interpreter {
 	}
 
 	private String reversalRule(String line) {
-		String newLine = "";
+		StringBuilder newLine = new StringBuilder();
 		String[] words = line.split(Pattern.quote(" "));
 
 		for (int i = 0; i < words.length; i++) {
-			String word = words[i];
-			String reverseWord = "";
-			
-			for (int j = word.length() - 1; j >= 0; j--) {
-				reverseWord += word.charAt(j);
-			}
-			
-			newLine += reverseWord + " ";
+			StringBuilder word = new StringBuilder(words[i]);
+			newLine.append(word.reverse()).append(" ");
 		}
 		
-		return newLine;
+		return newLine.toString();
 	}
 	
 }
